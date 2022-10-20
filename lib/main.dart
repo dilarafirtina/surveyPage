@@ -8,10 +8,16 @@ import 'package:url_launcher/url_launcher.dart';
 import 'default_button.dart';
 import 'firebase_options.dart';
 
-// TODO: !Önemli! Derledikten sonra, build/web içindeki index.html'in 17. satırında <base href="/"> olan ifade  => <base href="./"> olarak değişmeli
+final Storage _localStorage = window.localStorage;
 void main() async {
-  setUrlStrategy(
-      PathUrlStrategy()); // TODO: url'de #'i siliyormuş. https://docs.flutter.dev/development/ui/navigation/url-strategies
+  setUrlStrategy(PathUrlStrategy());
+  if (Uri.base.queryParameters.isNotEmpty) {
+    _localStorage['roomNumber'] = Uri.base.queryParameters["roomNumber"]!;
+    _localStorage['bdate'] = Uri.base.queryParameters["bdate"]!;
+    _localStorage['firstname'] = Uri.base.queryParameters["firstname"]!;
+    _localStorage['lastName'] = Uri.base.queryParameters["lastName"]!;
+    _localStorage['nation'] = Uri.base.queryParameters["nation"]!;
+  }
   runApp(App());
 }
 
@@ -113,39 +119,23 @@ class LandingOnePage extends StatelessWidget {
                         provisional: false,
                         sound: true,
                       );
-
-                      // TODO: açılan link, parametresiz anasayfaya yönlendirdiği için parametreleri bulamıyor
-                      //Uri.base - tarayıcıdaki linki baz alıyor.
-                      //var newUri = Uri.parse("https://my.opex.app/survey/bluewave/index.html?roomNumber=0621&bdate=1980-07-13&firstname=INNA&lastName=OLAR");
-                      String? roomNumber =
-                          Uri.base.queryParameters["roomNumber"];
-                      String? bdate = Uri.base.queryParameters["bdate"];
-                      String? firstname = Uri.base.queryParameters["firstname"];
-                      String? lastName = Uri.base.queryParameters["lastName"];
-                      String? nation = Uri.base.queryParameters["nation"];
-
-                      // String? roomNumber = Get.parameters['roomNumber'];
-                      // String? bdate = Get.parameters["bdate"];
-                      // String? firstname = Get.parameters["firstname"];
-                      // String? lastName = Get.parameters["lastName"];
-                      // String? nation = Get.parameters["nation"];
                       if (settings.authorizationStatus ==
                           AuthorizationStatus.authorized) {
                         final fcmToken = await FirebaseMessaging.instance.getToken(
                             vapidKey:
                                 "BDxVdP075LNb1SK3y-kzvqdn-CeMvltZOWuz-y2jFxTyelYxitjfqcdwvJcHmBi6YSrZ7u_smPICBaQqVOOu6kA");
-                        final Storage _localStorage = window.localStorage;
-                        _localStorage['roomNumber'] = roomNumber!;
-                        _localStorage['bdate'] = bdate!;
-                        _localStorage['firstname'] = firstname!;
-                        _localStorage['lastName'] = lastName!;
-                        _localStorage['nation'] = nation!;
                         _localStorage['fcmToken'] = fcmToken!;
+
                         String surveyId =
                             '446FA727-7BA3-410A-83A1-18084FE07FD9';
+                        String roomNumber = _localStorage['roomNumber']!;
+                        String bdate = _localStorage['bdate']!;
+                        String firstname = _localStorage['roomNumber']!;
+                        String lastName = _localStorage['lastName']!;
+                        String nation = _localStorage['nation']!;
 
                         final surveryUri =
-                            'https://my.opex.app/survey/bluewave/survey.html?SurveyId=$surveyId&roomNumber=$roomNumber&bdate=$bdate&firstname=$firstname&lastName=$lastName&nation=$nation';
+                            'https://my.opex.app/survey/bluewave/survey.html?SurveyId=$surveyId&roomNumber=$roomNumber&bdate=$bdate&firstname=$firstname&lastName=$lastName&nation=$nation&fcmToken=$fcmToken';
                         launchInBrowser(surveryUri);
                       } else {
                         launchInBrowser('https://my.opex.app/');
